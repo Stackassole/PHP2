@@ -1,0 +1,187 @@
+<?php
+session_start();
+$user_id = $_SESSION['member_id'];
+
+include "database.php";
+
+
+$sql_displayValues = "SELECT * FROM profiles where user_id = '$user_id'";
+$result_displayValues = mysqli_query($mysqli, $sql_displayValues);
+
+$row_displayValues = mysqli_fetch_assoc($result_displayValues);
+$about = $row_displayValues['about'] ?? '';
+$gender = $row_displayValues['gender']?? '';
+$dob = $row_displayValues['dob']?? '';
+$sport1 = $row_displayValues['sport1'] ??'';
+$sport2 = $row_displayValues['sport2']??'';
+$sport3 = $row_displayValues['sport3']??'';
+$country = $row_displayValues['country']??''; 
+
+echo $about;
+echo $gender;
+echo $dob;
+echo $sport1;
+echo $sport2;
+ 
+?>
+
+<?php
+if (isset($_REQUEST['submit'])){
+
+    $mysqli = require __DIR__  . "/database.php";
+
+
+ 
+ $sql_check_isavail = "SELECT * FROM profiles where user_id = '$user_id'";
+$result_check_isavail = mysqli_query($mysqli, $sql_check_isavail);
+
+if (mysqli_num_rows($result_check_isavail) == 1) {
+
+} else {
+    $sql= "INSERT INTO profiles (user_id, about, gender, dob, sport1, sport2, sport3, country)
+    VALUES (?,?,?,?,?,?,?,?)";
+
+$stmt = $mysqli->stmt_init();
+
+
+
+
+if ( ! $stmt->prepare($sql)) {
+die("SQL error: ". $mysqli->error);
+}
+
+/**binding values to the placeholder characters */
+
+$stmt->bind_param("ssssssss",
+              $_REQUEST["user_id"],
+              $_REQUEST["about"],
+              $_REQUEST["gender"],
+              $_REQUEST["dob"],
+              $_REQUEST["sport1"],
+              $_REQUEST["sport2"],
+              $_REQUEST["sport3"],
+              $_REQUEST["country"],
+              );
+             
+
+
+$stmt->execute();
+}
+}         
+?>
+
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helsinki Football Club</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> 
+<style>image{max-width:100%;}</style>
+</head>
+
+
+<body>
+<!--nav bar--> 
+
+<!--header-->
+<h1 class="profile-header">Edit your profile</h1>
+
+<!--main-->
+
+<form  action ="profile.php "method = "post">
+    
+    <!--profile pic-->
+
+    <div class="grid-item">
+        <label for="email" class="general-profile-element"> Choose a profile picture</label>
+        <input type="file" class='general-profile-element' name='profile_pic'>
+    </div>
+
+    <div class="grid-item">
+        <label>About</label>
+        <textarea placeholder = "Tell us about yourself"name ="about" id="about" cols="30" rows ="3" class ='general-profile-element'></textarea>
+    </div>
+    <div class="grid-item">
+        <label for ="gender">Gender</label>
+        <select class="gender-dropdown" name="gender" id="gender">
+            <option name ="gender" value="male">Male</option>
+            <option name ="gender" value="female">Female</option>
+            <option name ="gender" value="other">Other</option>
+        </select>
+        <div class ="grid-item"> 
+            <label for="gender"> Date of Birth</label>
+           <input type = "date" name = "dob" class ="general-profile-element">
+        </div>
+    </div>
+    
+    <div class="grid-item">
+        <label for="email">Your favorite sports</label>
+        <input type="text" name="sport1" class='general-profile-element' placeholder="#1">
+        <input type="text" name="sport2" class='general-profile-element' placeholder="#2">
+        <input type="text" name="sport3" class='general-profile-element' placeholder="#3">
+    </div>
+
+    <div class="grid-item">
+        <label for="password">Add clubs</label>
+        <input class="general-profile-element" id="" name="" id= " " type="">
+    </div>
+
+    
+    <div class="grid-item">
+    <label for="gender">Where are you from?</label>
+        <select name="country" id="country">
+        <?php
+      $sql_country = "SELECT * FROM countries";
+$result_country = mysqli_query($mysqli, $sql_country);  
+    while($row = mysqli_fetch_assoc($result_country)) {
+       echo "<option value='".$row['num_code']."'>" .$row['name']."</option>";
+    }  
+      ?>
+        </select>
+    </div>
+    <button class="login-button" name ="submit" type="submit">Submit changes</button>
+            
+</form>
+<section class="footer">
+
+<div id='f1' class="footer-content">
+       <h4> HSH</h4>
+        <p> A non-profit innitiative founded with the goal of providing free sports services to furhter unite our community</p>
+        <ul class="socials">
+            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+            <li><a href="#"><i class="fa fa-instagram"></i></a></li>
+            <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
+        </ul>
+</div>
+<div class="contact-col">
+      
+<div class="footer-bottom">
+    <p> copyright &copy;2022 Helsinki Sports Hub Founded by Ibo Gluk, Niklas Näsman, Olof Ljungberg</p>
+</div>
+</section>
+</body>
+</html>
+
+
+///database :
+<?php
+
+$host = "localhost";
+$dbname = "login_db";
+$username ="root";
+$password ="";
+
+$mysqli = new mysqli(hostname : $host,
+                    username: $username,
+                    password: $password,
+                    database: $dbname);
+if ($mysqli->connect_errno) {
+    die("Connecton error: " .$mysqli->connect_error);
+}
+
+return $mysqli;
+
+
+
+
+
